@@ -170,8 +170,18 @@ contract Ghosts {
                 opponent = players[playingGame[msg.sender]][0];
             }
             winner[playingGame[msg.sender]] = opponent;
+            // playingGame[msg.sender] = "";
+            // playingGame[opponent] = "";
         } else if (evil >= 4) {
+            address opponent;
+            if (players[playingGame[msg.sender]][0] == msg.sender) {
+                opponent = players[playingGame[msg.sender]][1];
+            } else {
+                opponent = players[playingGame[msg.sender]][0];
+            }
             winner[playingGame[msg.sender]] = msg.sender;
+            // playingGame[msg.sender] = "";
+            // playingGame[opponent] = "";
         }
     }
 

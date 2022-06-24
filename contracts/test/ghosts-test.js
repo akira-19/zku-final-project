@@ -168,6 +168,15 @@ describe('Ghosts', function () {
           const game = await ghosts.playingGame(player1.address);
           const winner = await ghosts.winner(game);
           expect(winner).to.equal(player2.address);
+          // const playingGame1 = await ghosts.playingGame(player1.address);
+          // const playingGame2 = await ghosts.playingGame(player2.address);
+
+          // expect(playingGame1).to.equal(
+          //   '0x0000000000000000000000000000000000000000000000000000000000000000',
+          // );
+          // expect(playingGame2).to.equal(
+          //   '0x0000000000000000000000000000000000000000000000000000000000000000',
+          // );
         });
       });
       describe('get good ghosts', function () {
@@ -195,10 +204,18 @@ describe('Ghosts', function () {
           await ghosts.connect(player1).move(3, 4, 2);
           await ghosts.connect(player2).revealPiece(7, 1);
         });
-        it('should set winner player2', async function () {
+        it('should set winner player1', async function () {
           const game = await ghosts.playingGame(player1.address);
           const winner = await ghosts.winner(game);
           expect(winner).to.equal(player1.address);
+          // const playingGame1 = await ghosts.playingGame(player1.address);
+          // const playingGame2 = await ghosts.playingGame(player2.address);
+          // expect(playingGame1).to.equal(
+          //   '0x0000000000000000000000000000000000000000000000000000000000000000',
+          // );
+          // expect(playingGame2).to.equal(
+          //   '0x0000000000000000000000000000000000000000000000000000000000000000',
+          // );
         });
       });
     });
