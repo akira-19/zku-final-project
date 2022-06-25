@@ -32,6 +32,7 @@ template Ghosts() {
 
    num = bit2num.out;
 
+
    poseidon.inputs[0] <== num;
    poseidon.inputs[1] <== privSalt;
 
@@ -40,3 +41,5 @@ template Ghosts() {
 }
 
 component main {public [pubHash]} = Ghosts();
+
+

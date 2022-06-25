@@ -1,18 +1,18 @@
 export class Game {
-  constructor() {
+  constructor(positionIdx) {
     this.position = [1, 5];
-    this.myBluePositions = [
+    this.positionIdx = positionIdx;
+    this.positions = [
       [1, 4],
       [2, 4],
       [1, 5],
       [2, 5],
-    ];
-    this.myRedPositions = [
       [3, 4],
       [4, 4],
       [3, 5],
       [3, 5],
     ];
+
     this.enemyPositions = [
       [1, 0],
       [2, 0],
@@ -48,5 +48,21 @@ export class Game {
       (Math.abs(dx) === 1 && Math.abs(dy) === 0) ||
       (Math.abs(dx) === 0 && Math.abs(dy) === 1)
     );
+  }
+  movePiece(idx, toX, toY) {
+    this.positions[idx] = [toX, toY];
+    this.emitChange();
+  }
+  canMovePiece(idx, toX, toY) {
+    const [x, y] = this.positions[idx];
+    const dx = toX - x;
+    const dy = toY - y;
+    const isPossibleMove =
+      (Math.abs(dx) === 1 && Math.abs(dy) === 0) ||
+      (Math.abs(dx) === 0 && Math.abs(dy) === 1);
+    var isNoPieceExist = this.positions.some(function (p) {
+      return p === [toX, toY];
+    });
+    return isPossibleMove && isNoPieceExist;
   }
 }

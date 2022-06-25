@@ -13,13 +13,13 @@ export const Board = ({ game }) => {
   const [position, setPosition] = useState(game.position);
   useEffect(() => game.observe(setPosition), [game]);
   const renderSquare = useCallback(
-    (i, [knightX, knightY]) => {
+    (i, [pieceX, pieceY]) => {
       const x = i % 6;
       const y = Math.floor(i / 6);
       return (
         <div key={i} style={squareStyle}>
           <BoardSquare x={x} y={y} game={game}>
-            <Piece isKnight={knightX === x && knightY === y} />
+            <Piece isGhost={pieceX === x && pieceY === y} />
           </BoardSquare>
         </div>
       );

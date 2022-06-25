@@ -30,7 +30,7 @@ describe.only('Ghosts test', function () {
     let witness;
     witness = await circuit.calculateWitness(
       {
-        ghosts: [1, 1, 1, 1, 0, 0, 0, 0],
+        ghosts: [1, 1, 1, 1, 0, 0, 0, 0].reverse(),
         pubHash: F.toObject(res),
         privSalt: 111,
       },
@@ -38,8 +38,8 @@ describe.only('Ghosts test', function () {
     );
 
     assert(Fr.eq(Fr.e(witness[0]), Fr.e(1)));
-    // assert(F.eq(F.e(witness[1]), F.e(res)));
-    // await circuit.assertOut(witness, { hashOut: F.toObject(res) });
-    // await circuit.checkConstraints(witness);
+    assert(F.eq(F.e(witness[1]), F.e(res)));
+    await circuit.assertOut(witness, { hashOut: F.toObject(res) });
+    await circuit.checkConstraints(witness);
   });
 });
