@@ -12,7 +12,7 @@ const buildPoseidon = require('circomlibjs').buildPoseidon;
 
 const assert = chai.assert;
 
-describe.only('Ghosts test', function () {
+describe('Ghosts test', function () {
   let poseidon;
   let F;
 
