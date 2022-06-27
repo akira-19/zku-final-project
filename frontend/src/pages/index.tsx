@@ -60,7 +60,7 @@ export default function Home() {
   };
 
   const verify = async () => {
-    const contractAddress = '0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6';
+    const contractAddress = '0xe8083f082a68aB2BD956b508A6baBaa9967E3afF';
     const provider = (await detectEthereumProvider()) as any;
     if (!provider) {
       alert('please install metamask');

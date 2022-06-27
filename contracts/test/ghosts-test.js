@@ -23,10 +23,14 @@ function unstringifyBigInts(o) {
   }
 }
 
-describe('Ghosts', function () {
+describe.only('Ghosts', function () {
   let ghosts;
   let player1;
   let player2;
+  let a;
+  let b;
+  let c;
+  let Input;
 
   beforeEach(async () => {
     [player1, player2] = await ethers.getSigners();
@@ -35,56 +39,45 @@ describe('Ghosts', function () {
     const Ghosts = await ethers.getContractFactory('Ghosts');
     ghosts = await Ghosts.deploy(verifier.address);
     await ghosts.deployed();
+
+    const poseidon = await buildPoseidon();
+    const F = poseidon.F;
+    const res = poseidon([240, 111]);
+    const input = {
+      pubHash: F.toObject(res),
+      ghosts: [1, 1, 1, 1, 0, 0, 0, 0].reverse(),
+      privSalt: 111,
+    };
+    const { proof, publicSignals } = await groth16.fullProve(
+      input,
+      'circuits/Ghosts_js/Ghosts.wasm',
+      'circuits/circuit_final.zkey',
+    );
+    // convert proof and publicSignals into solidity-readable calldata
+    const editedPublicSignals = unstringifyBigInts(publicSignals);
+    const editedProof = unstringifyBigInts(proof);
+    const calldata = await groth16.exportSolidityCallData(
+      editedProof,
+      editedPublicSignals,
+    );
+
+    // convert the calldata into big integers
+    const argv = calldata
+      .replace(/["[\]\s]/g, '')
+      .split(',')
+      .map((x) => BigInt(x).toString());
+
+    // convert the argv into the format which is accepted solidity smart contract
+    a = [argv[0], argv[1]];
+    b = [
+      [argv[2], argv[3]],
+      [argv[4], argv[5]],
+    ];
+    c = [argv[6], argv[7]];
+    Input = argv.slice(8);
   });
 
-  describe.only('start game function', function () {
-    let a;
-    let b;
-    let c;
-    let Input;
-    beforeEach(async function () {
-      const poseidon = await buildPoseidon();
-      const F = poseidon.F;
-      const res = poseidon([240, 111]);
-      const input = {
-        pubHash: F.toObject(res),
-        ghosts: [1, 1, 1, 1, 0, 0, 0, 0].reverse(),
-        privSalt: 111,
-      };
-      const { proof, publicSignals } = await groth16.fullProve(
-        input,
-        'circuits/Ghosts_js/Ghosts.wasm',
-        'circuits/circuit_final.zkey',
-      );
-      // convert proof and publicSignals into solidity-readable calldata
-      const editedPublicSignals = unstringifyBigInts(publicSignals);
-      const editedProof = unstringifyBigInts(proof);
-      const calldata = await groth16.exportSolidityCallData(
-        editedProof,
-        editedPublicSignals,
-      );
-
-      // convert the calldata into big integers
-      const argv = calldata
-        .replace(/["[\]\s]/g, '')
-        .split(',')
-        .map((x) => BigInt(x).toString());
-
-      // output log
-      console.log(argv);
-
-      // convert the argv into the format which is accepted solidity smart contract
-      a = [argv[0], argv[1]];
-      b = [
-        [argv[2], argv[3]],
-        [argv[4], argv[5]],
-      ];
-      c = [argv[6], argv[7]];
-      Input = argv.slice(8);
-
-      // verify the proof
-      // expect(await verifier.verifyProof(a, b, c, Input)).to.be.true;
-    });
+  describe('start game function', function () {
     it('should start a game', async function () {
       await ghosts.startGame(a, b, c, Input);
       const game = await ghosts.playingGame(player1.address);
@@ -105,8 +98,8 @@ describe('Ghosts', function () {
 
   describe('move function', function () {
     beforeEach(async () => {
-      await ghosts.startGame();
-      await ghosts.connect(player2).startGame();
+      await ghosts.startGame(a, b, c, Input);
+      await ghosts.connect(player2).startGame(a, b, c, Input);
     });
 
     it('should move a piece', async function () {
@@ -143,8 +136,8 @@ describe('Ghosts', function () {
 
   describe('get opponent piece in move function', function () {
     beforeEach(async () => {
-      await ghosts.startGame();
-      await ghosts.connect(player2).startGame();
+      await ghosts.startGame(a, b, c, Input);
+      await ghosts.connect(player2).startGame(a, b, c, Input);
       await ghosts.connect(player1).move(0, 1, 3);
       await ghosts.connect(player2).move(4, 1, 2);
       await ghosts.connect(player1).move(0, 1, 2);
@@ -167,8 +160,8 @@ describe('Ghosts', function () {
 
   describe('move function with need reveal piece', function () {
     beforeEach(async () => {
-      await ghosts.startGame();
-      await ghosts.connect(player2).startGame();
+      await ghosts.startGame(a, b, c, Input);
+      await ghosts.connect(player2).startGame(a, b, c, Input);
       await ghosts.connect(player1).move(0, 1, 3);
       await ghosts.connect(player2).move(4, 1, 2);
       await ghosts.connect(player1).move(0, 1, 2);
@@ -183,8 +176,8 @@ describe('Ghosts', function () {
 
   describe('revealPiece function', function () {
     beforeEach(async () => {
-      await ghosts.startGame();
-      await ghosts.connect(player2).startGame();
+      await ghosts.startGame(a, b, c, Input);
+      await ghosts.connect(player2).startGame(a, b, c, Input);
       await ghosts.connect(player1).move(0, 1, 3);
       await ghosts.connect(player2).move(4, 1, 2);
       await ghosts.connect(player1).move(0, 1, 2);

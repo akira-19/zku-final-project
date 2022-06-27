@@ -29,6 +29,9 @@ contract Ghosts {
         verifier = IVerifier(verifierAddress);
     }
 
+    event TurnStart(bytes32 indexed _game, address _turnPlayer);
+    event MustReveal(bytes32 indexed _game, address _turnPlayer);
+
     modifier isMyTurn() {
         bytes32 game = playingGame[msg.sender];
         require(game != "", "must be playing the game.");
@@ -133,10 +136,15 @@ contract Ghosts {
                 [4, 1]
             ];
             waitingGame = "";
+            emit TurnStart(
+                playingGame[msg.sender],
+                turnPlayer[playingGame[msg.sender]]
+            );
         }
         for (uint8 i = 0; i < 8; i++) {
             pieceStatuses[playingGame[msg.sender]][msg.sender][i] = 5;
         }
+
         return playingGame[msg.sender];
     }
 
@@ -155,6 +163,7 @@ contract Ghosts {
             } else {
                 opponent = players[playingGame[msg.sender]][0];
             }
+            bool isPieceGot = false;
             for (uint8 i = 0; i < 8; i++) {
                 uint8[2] memory piece = pieces[playingGame[msg.sender]][
                     opponent
@@ -162,10 +171,17 @@ contract Ghosts {
                 if (toX == piece[0] && toY == piece[1]) {
                     pieces[playingGame[msg.sender]][opponent][i] = [10, 10];
                     pieceStatuses[playingGame[msg.sender]][opponent][i] = 10;
+                    isPieceGot = true;
                     break;
                 }
             }
             turnPlayer[playingGame[msg.sender]] = opponent;
+
+            if (!isPieceGot) {
+                emit TurnStart(playingGame[msg.sender], opponent);
+            } else {
+                emit MustReveal(playingGame[msg.sender], opponent);
+            }
         }
     }
 
@@ -176,10 +192,13 @@ contract Ghosts {
         );
         require(status == 0 || status == 1, "must be zero or one.");
         pieceStatuses[playingGame[msg.sender]][msg.sender][idx] = status;
-        checkWinnerAfterReveal();
+        bool isWinnerExist = checkWinnerAfterReveal();
+        if (!isWinnerExist) {
+            emit TurnStart(playingGame[msg.sender], msg.sender);
+        }
     }
 
-    function checkWinnerAfterReveal() private {
+    function checkWinnerAfterReveal() private returns (bool) {
         uint8 good = 0;
         uint8 evil = 0;
         for (uint8 i = 0; i < 8; i++) {
@@ -202,6 +221,7 @@ contract Ghosts {
             winner[playingGame[msg.sender]] = opponent;
             // playingGame[msg.sender] = "";
             // playingGame[opponent] = "";
+            return true;
         } else if (evil >= 4) {
             address opponent;
             if (players[playingGame[msg.sender]][0] == msg.sender) {
@@ -212,7 +232,9 @@ contract Ghosts {
             winner[playingGame[msg.sender]] = msg.sender;
             // playingGame[msg.sender] = "";
             // playingGame[opponent] = "";
+            return true;
         }
+        return false;
     }
 
     function abs(int8 x) private pure returns (int8) {
