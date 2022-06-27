@@ -15,5 +15,7 @@ export const Piece: React.FC<Props> = ({
     return <Ghost isGoodGhost={isGoodGhost} isOpponent={isOpponent} />;
   } else if (isOpponent) {
     return <Ghost isGoodGhost={isGoodGhost} isOpponent={isOpponent} />;
+  } else {
+    return null;
   }
 };
