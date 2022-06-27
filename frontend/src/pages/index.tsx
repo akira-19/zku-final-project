@@ -7,7 +7,7 @@ import GhostsContract from '../../public/Ghosts.json';
 import { verifierCalldata } from '../zkproof/verifier';
 import { connectWallet } from '../utils/connectWallet';
 import { checkWalletConnection } from '../utils/checkWalletConnection';
-import { Ghosts } from './Ghosts';
+import Ghosts from './Ghosts';
 
 const buildPoseidon = require('circomlibjs').buildPoseidon;
 

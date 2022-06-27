@@ -6,10 +6,12 @@ const containerStyle = {
   border: '1px solid gray',
 };
 
-export const Ghosts = () => {
+const Ghosts = () => {
   return (
     <div style={containerStyle}>
       <Board />
     </div>
   );
 };
+
+export default Ghosts;
