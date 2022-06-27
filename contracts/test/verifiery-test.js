@@ -24,7 +24,7 @@ function unstringifyBigInts(o) {
   }
 }
 
-describe.only('Ghosts', function () {
+describe('Ghosts', function () {
   let Verifier;
   let verifier;
 
@@ -49,7 +49,6 @@ describe.only('Ghosts', function () {
       'circuits/Ghosts_js/Ghosts.wasm',
       'circuits/circuit_final.zkey',
     );
-
     // convert proof and publicSignals into solidity-readable calldata
     const editedPublicSignals = unstringifyBigInts(publicSignals);
     const editedProof = unstringifyBigInts(proof);

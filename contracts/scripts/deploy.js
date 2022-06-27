@@ -12,6 +12,11 @@ async function main() {
   const verifier = await Verifier.deploy();
 
   console.log('Verifier address:', verifier.address);
+
+  const Ghosts = await ethers.getContractFactory('Ghosts');
+  const ghosts = await Ghosts.deploy(verifier.address);
+
+  console.log('Ghosts address:', ghosts.address);
 }
 
 main()

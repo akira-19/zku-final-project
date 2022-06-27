@@ -3,7 +3,17 @@ import "hardhat/console.sol";
 
 pragma solidity >=0.8.0 <0.9.0;
 
+interface IVerifier {
+    function verifyProof(
+        uint256[2] memory a,
+        uint256[2][2] memory b,
+        uint256[2] memory c,
+        uint256[2] memory input
+    ) external view returns (bool r);
+}
+
 contract Ghosts {
+    IVerifier verifier;
     bytes32 public waitingGame;
     mapping(bytes32 => address[2]) public players;
     mapping(bytes32 => mapping(address => uint8[2][8])) public pieces;
@@ -14,6 +24,10 @@ contract Ghosts {
 
     // 0: evil, 1: good, 5: hidden, 10: need reveal
     mapping(bytes32 => mapping(address => uint8[8])) public pieceStatuses;
+
+    constructor(address verifierAddress) {
+        verifier = IVerifier(verifierAddress);
+    }
 
     modifier isMyTurn() {
         bytes32 game = playingGame[msg.sender];
@@ -67,8 +81,23 @@ contract Ghosts {
         _;
     }
 
-    function startGame() public {
+    function isValidProof(
+        uint256[2] memory a,
+        uint256[2][2] memory b,
+        uint256[2] memory c,
+        uint256[2] memory input
+    ) public view returns (bool) {
+        return verifier.verifyProof(a, b, c, input);
+    }
+
+    function startGame(
+        uint256[2] memory a,
+        uint256[2][2] memory b,
+        uint256[2] memory c,
+        uint256[2] memory input
+    ) public returns (bytes32) {
         require(playingGame[msg.sender] == "", "playing another game.");
+        require(verifier.verifyProof(a, b, c, input), "must be verified.");
         if (waitingGame == "") {
             waitingGame = keccak256(
                 abi.encodePacked(msg.sender, block.timestamp)
@@ -108,6 +137,7 @@ contract Ghosts {
         for (uint8 i = 0; i < 8; i++) {
             pieceStatuses[playingGame[msg.sender]][msg.sender][i] = 5;
         }
+        return playingGame[msg.sender];
     }
 
     function move(

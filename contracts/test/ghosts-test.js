@@ -1,5 +1,27 @@
 const { expect } = require('chai');
 const { ethers } = require('hardhat');
+const { groth16 } = require('snarkjs');
+const buildPoseidon = require('circomlibjs').buildPoseidon;
+
+function unstringifyBigInts(o) {
+  if (typeof o == 'string' && /^[0-9]+$/.test(o)) {
+    return BigInt(o);
+  } else if (typeof o == 'string' && /^0x[0-9a-fA-F]+$/.test(o)) {
+    return BigInt(o);
+  } else if (Array.isArray(o)) {
+    return o.map(unstringifyBigInts);
+  } else if (typeof o == 'object') {
+    if (o === null) return null;
+    const res = {};
+    const keys = Object.keys(o);
+    keys.forEach((k) => {
+      res[k] = unstringifyBigInts(o[k]);
+    });
+    return res;
+  } else {
+    return o;
+  }
+}
 
 describe('Ghosts', function () {
   let ghosts;
@@ -8,14 +30,63 @@ describe('Ghosts', function () {
 
   beforeEach(async () => {
     [player1, player2] = await ethers.getSigners();
+    const Verifier = await ethers.getContractFactory('Verifier');
+    verifier = await Verifier.deploy();
     const Ghosts = await ethers.getContractFactory('Ghosts');
-    ghosts = await Ghosts.deploy();
+    ghosts = await Ghosts.deploy(verifier.address);
     await ghosts.deployed();
   });
 
-  describe('start game function', function () {
+  describe.only('start game function', function () {
+    let a;
+    let b;
+    let c;
+    let Input;
+    beforeEach(async function () {
+      const poseidon = await buildPoseidon();
+      const F = poseidon.F;
+      const res = poseidon([240, 111]);
+      const input = {
+        pubHash: F.toObject(res),
+        ghosts: [1, 1, 1, 1, 0, 0, 0, 0].reverse(),
+        privSalt: 111,
+      };
+      const { proof, publicSignals } = await groth16.fullProve(
+        input,
+        'circuits/Ghosts_js/Ghosts.wasm',
+        'circuits/circuit_final.zkey',
+      );
+      // convert proof and publicSignals into solidity-readable calldata
+      const editedPublicSignals = unstringifyBigInts(publicSignals);
+      const editedProof = unstringifyBigInts(proof);
+      const calldata = await groth16.exportSolidityCallData(
+        editedProof,
+        editedPublicSignals,
+      );
+
+      // convert the calldata into big integers
+      const argv = calldata
+        .replace(/["[\]\s]/g, '')
+        .split(',')
+        .map((x) => BigInt(x).toString());
+
+      // output log
+      console.log(argv);
+
+      // convert the argv into the format which is accepted solidity smart contract
+      a = [argv[0], argv[1]];
+      b = [
+        [argv[2], argv[3]],
+        [argv[4], argv[5]],
+      ];
+      c = [argv[6], argv[7]];
+      Input = argv.slice(8);
+
+      // verify the proof
+      // expect(await verifier.verifyProof(a, b, c, Input)).to.be.true;
+    });
     it('should start a game', async function () {
-      await ghosts.startGame();
+      await ghosts.startGame(a, b, c, Input);
       const game = await ghosts.playingGame(player1.address);
       expect(game).not.equal(
         '0x0000000000000000000000000000000000000000000000000000000000000000',
@@ -23,8 +94,8 @@ describe('Ghosts', function () {
     });
 
     it('should join a game', async function () {
-      await ghosts.startGame();
-      await ghosts.connect(player2).startGame();
+      await ghosts.startGame(a, b, c, Input);
+      await ghosts.connect(player2).startGame(a, b, c, Input);
       const game = await ghosts.playingGame(player2.address);
       expect(game).not.equal(
         '0x0000000000000000000000000000000000000000000000000000000000000000',
