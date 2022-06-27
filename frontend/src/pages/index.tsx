@@ -1,15 +1,16 @@
 import { useEffect, useState } from 'react';
 import Head from 'next/head';
 import Layout from '../components/Layout';
-import detectEthereumProvider from '@metamask/detect-provider';
-import { ethers, providers, BigNumber } from 'ethers';
-import GhostsContract from '../../public/Ghosts.json';
-import { verifierCalldata } from '../zkproof/verifier';
+
 import { connectWallet } from '../utils/connectWallet';
 import { checkWalletConnection } from '../utils/checkWalletConnection';
 import Ghosts from './Ghosts';
 
-const buildPoseidon = require('circomlibjs').buildPoseidon;
+const style = {
+  width: '100%',
+  display: 'flex',
+  justifyContent: 'center',
+};
 
 export default function Home() {
   const [currentAccount, setCurrentAccount] = useState(null);
@@ -17,7 +18,7 @@ export default function Home() {
   const checkWalletIsConnected = async () => {
     const accounts = await checkWalletConnection();
 
-    if (accounts.length !== 0) {
+    if (accounts && accounts.length > 0) {
       const account = accounts[0];
       setCurrentAccount(account);
     } else {
@@ -37,64 +38,10 @@ export default function Home() {
 
   const connectWalletButton = () => {
     return (
-      <button
-        onClick={connectWalletHandler}
-        className="cta-button connect-wallet-button"
-      >
-        Connect Wallet
-      </button>
+      <div className="button01" onClick={connectWalletHandler}>
+        <a href="">Connect Wallet</a>
+      </div>
     );
-  };
-
-  const startGameButton = () => {
-    return (
-      <button
-        onClick={() => {
-          alert(currentAccount);
-        }}
-        className="cta-button mint-nft-button"
-      >
-        Start Game
-      </button>
-    );
-  };
-
-  const verify = async () => {
-    const contractAddress = '0xe8083f082a68aB2BD956b508A6baBaa9967E3afF';
-    const provider = (await detectEthereumProvider()) as any;
-    if (!provider) {
-      alert('please install metamask');
-    }
-    const accounts = await provider.request({
-      method: 'eth_requestAccounts',
-    });
-    const ethersProvider = new providers.Web3Provider(provider);
-    const signer = ethersProvider.getSigner();
-    const contract = new ethers.Contract(
-      contractAddress,
-      GhostsContract.abi,
-      signer,
-    );
-    const poseidon = await buildPoseidon();
-    const F = poseidon.F;
-    const ress = poseidon([240, 111]);
-    const inputs = {
-      pubHash: F.toObject(ress),
-      ghosts: [1, 1, 1, 1, 0, 0, 0, 0].reverse(),
-      privSalt: 111,
-    };
-    const input = await verifierCalldata(inputs);
-    if (input && input.length > 0) {
-      let txn = await contract.startGame(
-        input[0],
-        input[1],
-        input[2],
-        input[3],
-      );
-      console.log(txn);
-      let tx = await txn.wait();
-      console.log(tx);
-    }
   };
 
   useEffect(() => {
@@ -105,17 +52,14 @@ export default function Home() {
       <Head>
         <title>Ghosts</title>
       </Head>
-      <div>
-        {/* <div className="main-app">
-          <h1>Ghosts</h1>
-          <div>{connectWalletButton()}</div>
-          <button onClick={verify}>Verify</button>
-        </div> */}
+      <div style={style}>
         {currentAccount ? (
           <Ghosts />
         ) : (
           <div className="main-app">
-            <h1>Ghosts</h1>
+            <h1 style={{ fontSize: '60px', color: 'white', marginTop: '75px' }}>
+              Ghosts
+            </h1>
             <div>{connectWalletButton()}</div>
           </div>
         )}

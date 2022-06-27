@@ -22,9 +22,16 @@ export const Ghost: React.FC<Props> = ({ isGoodGhost, isOpponent }) => {
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
+          userSelect: 'none',
         }}
       >
-        <Image width={60} height={60} src={imgSrc} alt="Logo" />
+        <Image
+          width={60}
+          height={60}
+          src={imgSrc}
+          alt="Logo"
+          style={{ pointerEvents: 'none', userSelect: 'none' }}
+        />
       </div>
     </>
   );

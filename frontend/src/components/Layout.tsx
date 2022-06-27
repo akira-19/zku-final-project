@@ -2,9 +2,14 @@ import React from 'react';
 
 const Layout = ({ children }: any) => {
   return (
-    <>
-      <main>{children}</main>
-    </>
+    <main
+      style={{
+        height: '100vh',
+        width: '100%',
+      }}
+    >
+      {children}
+    </main>
   );
 };
 

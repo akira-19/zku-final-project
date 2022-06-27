@@ -1,4 +1,6 @@
-export const moveGhost = (
+import { getContract } from './getContract';
+
+export const moveGhost = async (
   positions: any,
   currentIdx: number,
   toIdx: number,
@@ -8,11 +10,14 @@ export const moveGhost = (
   const x = currentIdx % 6;
   const y = Math.floor(currentIdx / 6);
 
-  let newPositions = positions;
+  const newPositions = positions;
+
+  const { contract } = await getContract();
 
   positions.some((v: any, i: number) => {
     if (JSON.stringify(v) === JSON.stringify([x, y])) {
-      newPositions[i] = [toX, toY];
+      // newPositions[i] = [toX, toY];
+      contract.move(i, toX, toY);
       return true;
     }
     return false;

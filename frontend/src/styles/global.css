@@ -1,0 +1,36 @@
+body {
+  font-family: 'SF Pro Text', 'SF Pro Icons', 'Helvetica Neue', 'Helvetica',
+    'Arial', sans-serif;
+  margin: 0;
+	background-image: url('../../public/images/bg.jpg');
+	background-repeat: no-repeat;
+	background-attachment: fixed;
+	background-size: 100%;
+}
+
+
+.button01 a {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto;
+  padding: 1em 2em;
+  width: 170px;
+  color: #ddd;
+  font-size: 18px;
+  font-weight: 700;
+  background-color: #222;
+  transition: 0.3s;
+	text-decoration: none;
+}
+
+
+.button01 a:hover {
+  text-decoration: none;
+  background-color: #bbbbbb;
+}
+
+.good_input {
+  width: 30px;
+  font-size: 20px;
+}

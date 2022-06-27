@@ -7,18 +7,17 @@ const squareStyle = {
 };
 
 type Props = {
-  black: boolean;
-  isSelected: boolean;
+  color: string;
+  border: string;
   children: React.ReactElement;
 };
-export const Square: React.FC<Props> = ({ black, isSelected, children }) => {
-  let fill = black ? 'grey' : 'white';
-  fill = isSelected ? 'yellow' : fill;
+export const Square: React.FC<Props> = ({ color, border, children }) => {
   return (
     <div
       style={{
         ...squareStyle,
-        backgroundColor: fill,
+        backgroundColor: color,
+        border: border,
       }}
     >
       {children}

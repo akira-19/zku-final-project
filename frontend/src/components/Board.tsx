@@ -3,43 +3,63 @@ import { BoardSquare } from './BoardSquare';
 import { Piece } from './Piece';
 import { checkMovable } from '../utils/checkMovable';
 import { moveGhost } from '../utils/moveGhost';
-
-const initialPositions = [
-  [1, 4],
-  [2, 4],
-  [3, 4],
-  [4, 4],
-  [1, 5],
-  [2, 5],
-  [3, 5],
-  [4, 5],
-];
-
-const initialOpponentPositions = [
-  [1, 0],
-  [2, 0],
-  [3, 0],
-  [4, 0],
-  [1, 1],
-  [2, 1],
-  [3, 1],
-  [4, 1],
-];
-
-const initialGhostTypeIndices = [1, 1, 1, 1, 0, 0, 0, 0];
+import { getContract } from '../utils/getContract';
+import { checkOngoingGame } from '../utils/checkOngoingGame';
+import { ethers } from 'ethers';
 
 export const Board = () => {
-  const [positions, setPositions] = useState(initialPositions);
-  const [opponentPositions, setOpponentPositions] = useState(
-    initialOpponentPositions,
-  );
+  const initialGhostTypeIndices = localStorage.getItem('GHOST_TYPE_INDICES');
+  const [positions, setPositions] = useState([]);
+  const [opponentPositions, setOpponentPositions] = useState([]);
+  const [goodAndEvil, setGoodAndEvil] = useState([0, 0]);
+  const [needRevealIdx, setNeedRevealIdx] = useState(10);
   const [selected, setSelected] = useState<number | null>(null);
-  const ghostTypeIndices = initialGhostTypeIndices;
+  const ghostTypeIndices = initialGhostTypeIndices
+    ? JSON.parse(initialGhostTypeIndices)
+    : [1, 1, 1, 1, 0, 0, 0, 0];
 
-  const ghostClickHandler = (currentIdx: number | null, toIdx: number) => {
+  useEffect(() => {
+    const f = async () => {
+      const { contract, account } = await getContract();
+      const game = await checkOngoingGame(contract, account);
+      const filter = contract.filters.TurnStart(game, null);
+      contract.on(filter, (game, winnerAddress) => {
+        if (winnerAddress.toLowerCase() == account.toLowerCase()) {
+          console.log('your turn');
+        } else {
+          console.log('not your turn');
+        }
+      });
+      if (game !== ethers.constants.HashZero) {
+        const pieces = await contract.currentPositions();
+        const pieceStatuses = await contract.currentPieceStatuses();
+        if (pieceStatuses[0].includes(10)) {
+          const index = pieceStatuses[0].findIndex((v: number) => v === 10);
+          setNeedRevealIdx(index);
+        }
+        setPositions(pieces[0]);
+        setOpponentPositions(pieces[1]);
+        const good = pieceStatuses[1].filter((v: number) => v === 1).length;
+        const evil = pieceStatuses[1].filter((v: number) => v === 0).length;
+        setGoodAndEvil([good, evil]);
+      }
+    };
+    f();
+  }, []);
+
+  const reveal = async () => {
+    const { contract } = await getContract();
+
+    await contract.revealPiece(needRevealIdx, ghostTypeIndices[needRevealIdx]);
+  };
+
+  const ghostClickHandler = async (
+    currentIdx: number | null,
+    toIdx: number,
+  ) => {
     if (currentIdx) {
       if (checkMovable(positions, toIdx, currentIdx)) {
-        const newPositions = moveGhost(positions, currentIdx, toIdx);
+        const newPositions = await moveGhost(positions, currentIdx, toIdx);
         setPositions(newPositions);
       } else {
         setSelected(null);
@@ -70,6 +90,12 @@ export const Board = () => {
         return false;
       });
 
+      const isGoal =
+        (x === 0 && y === 0) ||
+        (x === 5 && y === 0) ||
+        (x === 0 && y === 5) ||
+        (x === 5 && y === 5);
+
       return (
         <div
           key={i}
@@ -78,7 +104,13 @@ export const Board = () => {
             ghostClickHandler(selected, i);
           }}
         >
-          <BoardSquare x={x} y={y} isSelected={isGhost && i === selected}>
+          <BoardSquare
+            x={x}
+            y={y}
+            isSelected={isGhost && i === selected}
+            isGoal={isGoal}
+            isSelectable={false}
+          >
             <Piece
               isGhost={isGhost}
               isGoodGhost={isGoodGhost}
@@ -103,6 +135,19 @@ export const Board = () => {
       }}
     >
       {squares}
+      <div
+        style={{
+          marginTop: '15px',
+          color: 'white',
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      >
+        <p>
+          What you got: Good: {goodAndEvil[0]}, Evil: {goodAndEvil[1]}
+        </p>
+        {needRevealIdx === 10 ? null : <button onClick={reveal}>reveal</button>}
+      </div>
     </div>
   );
 };

@@ -77,7 +77,7 @@ describe.only('Ghosts', function () {
     Input = argv.slice(8);
   });
 
-  describe('start game function', function () {
+  describe.only('start game function', function () {
     it('should start a game', async function () {
       await ghosts.startGame(a, b, c, Input);
       const game = await ghosts.playingGame(player1.address);
