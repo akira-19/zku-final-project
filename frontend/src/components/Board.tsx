@@ -14,6 +14,7 @@ export const Board = () => {
   const [goodAndEvil, setGoodAndEvil] = useState([0, 0]);
   const [needRevealIdx, setNeedRevealIdx] = useState(10);
   const [selected, setSelected] = useState<number | null>(null);
+  const [isWinningPosition, setIsWinningPosition] = useState(false);
   const ghostTypeIndices = initialGhostTypeIndices
     ? JSON.parse(initialGhostTypeIndices)
     : [1, 1, 1, 1, 0, 0, 0, 0];
@@ -42,6 +43,20 @@ export const Board = () => {
         const good = pieceStatuses[1].filter((v: number) => v === 1).length;
         const evil = pieceStatuses[1].filter((v: number) => v === 0).length;
         setGoodAndEvil([good, evil]);
+        const player1 = await contract.players(game, 0);
+        if (player1.toLowerCase() === account.toLowerCase()) {
+          const t = pieces[0].some(
+            (v: number[]) =>
+              (v[0] === 0 && v[1] === 0) || (v[0] === 5 && v[1] === 0),
+          );
+          t && setIsWinningPosition(true);
+        } else {
+          const t = pieces[0].some(
+            (v: number[]) =>
+              (v[0] === 0 && v[1] === 5) || (v[0] === 5 && v[1] === 5),
+          );
+          t && setIsWinningPosition(true);
+        }
       }
     };
     f();
@@ -67,6 +82,12 @@ export const Board = () => {
     } else {
       setSelected(toIdx);
     }
+  };
+
+  const callWin = async () => {
+    const { contract } = await getContract();
+
+    await contract.winMove();
   };
 
   const renderSquare = useCallback(
@@ -147,6 +168,9 @@ export const Board = () => {
           What you got: Good: {goodAndEvil[0]}, Evil: {goodAndEvil[1]}
         </p>
         {needRevealIdx === 10 ? null : <button onClick={reveal}>reveal</button>}
+        {isWinningPosition ? (
+          <button onClick={callWin}>Declare Win</button>
+        ) : null}
       </div>
     </div>
   );
