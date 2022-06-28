@@ -30,3 +30,61 @@ In the contract, each player has to submit their proof when they start a game.
 ### frontend
 
 Frontend UI is implemented by next.js and hosted in Vercel.
+
+## Run locally
+
+### contracts
+
+With running hardhat nodes(`npx hardhat node`), in contracts directory,
+
+```
+yarn install
+sh ./scripts/compile-circuit.sh
+npx hardhat run --network localhost scripts/deploy.js
+```
+
+copy the Ghosts address and paste it to the contractAddress variable in `/frontend/src/utils/getContract.ts`
+
+### frontend
+
+In frontend directory,
+
+```
+yarn install
+yarn dev
+```
+
+## Test
+
+### contracts
+
+In contracts directory, you can test contracts and circuits.
+
+```
+yarn install
+sh ./scripts/compile-circuit.sh
+yarn test
+```
+
+In test directory,
+
+- ghosts-test.js tests the smart contract in Ghosts.sol
+- verifier-circuits-test.js tests the circuit in Ghosts.circom
+- verifier-test.js test the smart contract in verifier.sol which is auto generated from Ghosts.circom
+
+## How to play
+
+1. Connect your metamask wallet, then you are in a game.
+2. Select 4 indices that good ghosts are placed, and click Start Game
+3. In your turn, pick one ghost and move it.
+4. When your ghost is got, you have to reveal the ghost's type before you move your ghost.
+5. Winning conditions are following,
+   - You get all the opponent's good ghosts.
+   - The opponents get all your evil ghosts.
+   - Your good ghost gets the opponent side red square and declare win.
+
+## Future steps
+
+- Give ERC20 utility token to players
+- Players can buy NFT by the utility token
+- Players use the NFT for ghosts images in games
