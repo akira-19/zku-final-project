@@ -10,7 +10,7 @@ const nextConfig = {
     config.experiments = {
       asyncWebAssembly: true,
     };
-    config.output.webassemblyModuleFilename = 'public/Ghosts.wasm';
+    config.output.webassemblyModuleFilename = '../public/Ghosts.wasm';
 
     return config;
   },
