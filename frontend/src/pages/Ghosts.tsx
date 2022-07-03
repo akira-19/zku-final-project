@@ -28,7 +28,7 @@ const containerStyle = {
   marginTop: '30px',
 };
 
-const Ghosts = () => {
+export default function Ghosts() {
   const router = useRouter();
   const [status, setStatus] = useState('Waiting ...');
   const [element, setElement] = useState(<div></div>);
@@ -107,6 +107,4 @@ const Ghosts = () => {
       </div>
     </Layout>
   );
-};
-
-export default Ghosts;
+}
