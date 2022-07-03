@@ -6,10 +6,9 @@ const nextConfig = {
     config.experiments.topLevelAwait = true;
     config.resolve = config.resolve || {};
     config.resolve.fallback = config.resolve.fallback || {};
-    config.resolve.fallback.fs = false;
-    config.node = {
-      fs: 'empty',
-    };
+    if (!isServer) {
+      config.resolve.fallback.fs = false;
+    }
 
     return config;
   },
