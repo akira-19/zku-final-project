@@ -7,10 +7,10 @@ const nextConfig = {
     config.resolve = config.resolve || {};
     config.resolve.fallback = config.resolve.fallback || {};
     config.resolve.fallback.fs = false;
-    config.experiments = {
-      asyncWebAssembly: true,
-    };
-    config.output.webassemblyModuleFilename = '../public/Ghosts.wasm';
+    // config.experiments = {
+    //   asyncWebAssembly: true,
+    // };
+    // config.output.webassemblyModuleFilename = '../public/Ghosts.wasm';
 
     return config;
   },
