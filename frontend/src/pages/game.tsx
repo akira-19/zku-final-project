@@ -28,7 +28,7 @@ const containerStyle = {
   marginTop: '30px',
 };
 
-export default function Ghosts() {
+export default function Game() {
   const router = useRouter();
   const [status, setStatus] = useState('Waiting ...');
   const [element, setElement] = useState(<div></div>);

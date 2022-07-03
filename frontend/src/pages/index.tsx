@@ -80,7 +80,7 @@ export default function Home() {
       return (
         <>
           <div className="button01">
-            <Link href="/ghosts">
+            <Link href="/game">
               <a>Game Start</a>
             </Link>
           </div>
