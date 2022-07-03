@@ -25,9 +25,9 @@ yarn-error.log*
 
 
 circuit_0000.zkey
-circuit_final.zkey
+contracts/*/circuit_final.zkey
 Ghosts.r1cs
-Ghosts.wasm
+contracts/*/Ghosts.wasm
 Ghosts.sym
 verification_key.json
 **/Ghosts_js
