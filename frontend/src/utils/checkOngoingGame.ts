@@ -5,7 +5,6 @@ export const checkOngoingGame = async (
 ) => {
   try {
     const playingGame = await contract.playingGame(account);
-
     return playingGame;
   } catch (error) {
     console.error(error);

@@ -1,6 +1,8 @@
 const { expect } = require('chai');
 const { ethers } = require('hardhat');
 const { groth16 } = require('snarkjs');
+const { poseidonContract } = require('circomlibjs');
+
 const buildPoseidon = require('circomlibjs').buildPoseidon;
 
 function unstringifyBigInts(o) {
@@ -36,7 +38,19 @@ describe.only('Ghosts', function () {
     [player1, player2] = await ethers.getSigners();
     const Verifier = await ethers.getContractFactory('Verifier');
     verifier = await Verifier.deploy();
-    const Ghosts = await ethers.getContractFactory('Ghosts');
+
+    const PoseidonT3 = await ethers.getContractFactory(
+      poseidonContract.generateABI(2),
+      poseidonContract.createCode(2),
+    );
+    const poseidonT3 = await PoseidonT3.deploy();
+    await poseidonT3.deployed();
+
+    const Ghosts = await ethers.getContractFactory('Ghosts', {
+      libraries: {
+        PoseidonT3: poseidonT3.address,
+      },
+    });
     ghosts = await Ghosts.deploy(verifier.address);
     await ghosts.deployed();
 

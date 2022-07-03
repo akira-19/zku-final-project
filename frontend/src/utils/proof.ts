@@ -40,7 +40,6 @@ export const generateProof = async (): Promise<Proof> => {
 
   let { proof } = await groth16.fullProve(
     utils.stringifyBigInts(input),
-    // input,
     './Ghosts.wasm',
     './circuit_final.zkey',
   );

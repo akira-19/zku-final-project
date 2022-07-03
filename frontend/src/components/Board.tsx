@@ -15,6 +15,7 @@ export const Board = () => {
   const [needRevealIdx, setNeedRevealIdx] = useState(10);
   const [selected, setSelected] = useState<number | null>(null);
   const [isWinningPosition, setIsWinningPosition] = useState(false);
+  const [isWinningPositionIdx, setIsWinningPositionIdx] = useState(-1);
   const ghostTypeIndices = initialGhostTypeIndices
     ? JSON.parse(initialGhostTypeIndices)
     : [1, 1, 1, 1, 0, 0, 0, 0];
@@ -23,6 +24,7 @@ export const Board = () => {
     const f = async () => {
       const { contract, account } = await getContract();
       const game = await checkOngoingGame(contract, account);
+
       const filter = contract.filters.TurnStart(game, null);
       contract.on(filter, (game, winnerAddress) => {
         if (winnerAddress.toLowerCase() == account.toLowerCase()) {
@@ -42,18 +44,30 @@ export const Board = () => {
         setOpponentPositions(pieces[1]);
         const good = pieceStatuses[1].filter((v: number) => v === 1).length;
         const evil = pieceStatuses[1].filter((v: number) => v === 0).length;
-        setGoodAndEvil([good, evil]);
+        const evilCount = evil > 4 ? 0 : evil;
+        setGoodAndEvil([good, evilCount]);
         const player1 = await contract.players(game, 0);
         if (player1.toLowerCase() === account.toLowerCase()) {
           const t = pieces[0].some(
-            (v: number[]) =>
-              (v[0] === 0 && v[1] === 0) || (v[0] === 5 && v[1] === 0),
+            (v: number[], idx: number) =>
+              (v[0] === 0 && v[1] === 0 && ghostTypeIndices[idx] === 1) ||
+              (v[0] === 5 && v[1] === 0 && ghostTypeIndices[idx] === 1),
           );
+          // const t = pieces[0].some(
+          //   (v: number[], idx: number) =>
+          //     (v[0] === 0 && v[1] === 0 && ghostTypeIndices[idx] === 1) ||
+          //     (v[0] === 5 && v[1] === 0 && ghostTypeIndices[idx] === 1),
+          // );
+          //   let passIndex = result.findIndex(function(element, idx){
+          //     console.log(idx)
+          //   return element > 85;
+          // });
           t && setIsWinningPosition(true);
         } else {
           const t = pieces[0].some(
-            (v: number[]) =>
-              (v[0] === 0 && v[1] === 5) || (v[0] === 5 && v[1] === 5),
+            (v: number[], idx: number) =>
+              (v[0] === 0 && v[1] === 5 && ghostTypeIndices[idx] === 1) ||
+              (v[0] === 5 && v[1] === 5 && ghostTypeIndices[idx] === 1),
           );
           t && setIsWinningPosition(true);
         }
@@ -87,6 +101,14 @@ export const Board = () => {
   const callWin = async () => {
     const { contract } = await getContract();
 
+    // positions.
+
+    // let passIndex = result.findIndex(function(element){
+    //   return element > 85;
+    // });
+    // uint8 idx,
+    //     uint8[] memory statuses,
+    //     uint256 solt
     await contract.winMove();
   };
 

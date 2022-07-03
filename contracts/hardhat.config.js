@@ -21,18 +21,18 @@ const HARMONY_PRIVATE_KEY = process.env.HARMONY_PRIVATE_KEY;
 
 module.exports = {
   solidity: '0.8.4',
-  networks: {
-    devnet: {
-      url: `https://api.s0.ps.hmny.io`,
-      accounts: [`0x${HARMONY_PRIVATE_KEY}`],
-    },
-    testnet: {
-      url: `https://api.s0.b.hmny.io`,
-      accounts: [`0x${HARMONY_PRIVATE_KEY}`],
-    },
-    mainnet: {
-      url: `https://api.harmony.one`,
-      accounts: [`0x${HARMONY_PRIVATE_KEY}`],
-    },
-  },
+  // networks: {
+  //   devnet: {
+  //     url: `https://api.s0.ps.hmny.io`,
+  //     accounts: [`0x${HARMONY_PRIVATE_KEY}`],
+  //   },
+  //   testnet: {
+  //     url: `https://api.s0.b.hmny.io`,
+  //     accounts: [`0x${HARMONY_PRIVATE_KEY}`],
+  //   },
+  //   mainnet: {
+  //     url: `https://api.harmony.one`,
+  //     accounts: [`0x${HARMONY_PRIVATE_KEY}`],
+  //   },
+  // },
 };

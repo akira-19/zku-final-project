@@ -3,9 +3,15 @@ import { BoardSquare } from './BoardSquare';
 import { Piece } from './Piece';
 import { verifierCalldata } from '../zkproof/verifier';
 import { getContract } from '../utils/getContract';
+import { useRouter } from 'next/router';
 const buildPoseidon = require('circomlibjs').buildPoseidon;
 
-export const InitialBoard = () => {
+type Props = {
+  gameStartHandler: (text: string) => void;
+};
+
+export const InitialBoard: React.FC<Props> = ({ gameStartHandler }) => {
+  const router = useRouter();
   const [positions, setPositions] = useState<('' | number)[]>([]);
   const inputHandler = (idx: number, num: number) => {
     if (positions.includes(num) || (num < 0 && num > 7)) {
@@ -20,47 +26,56 @@ export const InitialBoard = () => {
   };
 
   const clickHandler = async () => {
-    const { contract } = await getContract();
-    const poseidon = await buildPoseidon();
-    const F = poseidon.F;
+    gameStartHandler('Create a proof and waiting transaction confirmed.');
+    try {
+      const { contract } = await getContract();
+      const poseidon = await buildPoseidon();
+      const F = poseidon.F;
 
-    let binary = '';
-    const ghostTypeIndices = [0, 1, 2, 3, 4, 5, 6, 7].map((v) => {
-      if (positions.includes(v + 1)) {
-        binary = binary + '1';
-        return 1;
-      } else {
-        binary = binary + '0';
-        return 0;
-      }
-    });
+      let binary = '';
+      const ghostTypeIndices = [0, 1, 2, 3, 4, 5, 6, 7].map((v) => {
+        if (positions.includes(v + 1)) {
+          binary = binary + '1';
+          return 1;
+        } else {
+          binary = binary + '0';
+          return 0;
+        }
+      });
 
-    localStorage.setItem(
-      'GHOST_TYPE_INDICES',
-      JSON.stringify(ghostTypeIndices),
-    );
-
-    const v = parseInt(binary, 2);
-
-    const res = poseidon([v, 111]);
-    const inputs = {
-      pubHash: F.toObject(res),
-      ghosts: ghostTypeIndices.reverse(),
-      privSalt: 111,
-    };
-    const input = await verifierCalldata(inputs);
-    if (input && input.length > 0) {
-      console.log(input[3]);
-      const txn = await contract.startGame(
-        input[0],
-        input[1],
-        input[2],
-        input[3],
+      localStorage.setItem(
+        'GHOST_TYPE_INDICES',
+        JSON.stringify(ghostTypeIndices),
       );
 
-      console.log(txn);
-      const tx = await txn.wait();
-      console.log(tx);
+      const salt = Math.floor(Math.random() * 10000000000);
+
+      localStorage.setItem('SALT', salt.toString());
+
+      const v = parseInt(binary, 2);
+
+      const res = poseidon([v, salt]);
+      const inputs = {
+        pubHash: F.toObject(res),
+        ghosts: ghostTypeIndices.reverse(),
+        privSalt: salt,
+      };
+      const input = await verifierCalldata(inputs);
+      if (input && input.length > 0) {
+        console.log(input[3]);
+        const txn = await contract.startGame(
+          input[0],
+          input[1],
+          input[2],
+          input[3],
+        );
+
+        const tx = await txn.wait();
+        gameStartHandler('Transaction Confirmed');
+        router.reload();
+      }
+    } catch (error) {
+      console.error(error);
     }
   };
 
