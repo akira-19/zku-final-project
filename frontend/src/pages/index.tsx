@@ -7,6 +7,7 @@ import { connectWallet } from '../utils/connectWallet';
 import { checkWalletConnection } from '../utils/checkWalletConnection';
 import { claimGhost } from '../utils/claimGhost';
 import { balanceOf } from '../utils/balanceOf';
+import { getWinner } from '../utils/getWinner';
 
 const style = {
   width: '100%',
@@ -15,15 +16,18 @@ const style = {
 };
 
 export default function Home() {
-  const [currentAccount, setCurrentAccount] = useState(null);
+  const [currentAccount, setCurrentAccount] = useState<string | null>(null);
   const [currentBalance, setCurrentBalance] = useState(0);
+  const [winner, setWinner] = useState<string | null>(null);
 
   const checkWalletIsConnected = async () => {
     try {
       const accounts = await checkWalletConnection();
+      const w = await getWinner();
       if (accounts && accounts.length > 0) {
         const account = accounts[0];
         setCurrentAccount(account);
+        setWinner(w);
         const { balance, claimable } = await balanceOf();
         setCurrentBalance(balance);
       } else {
@@ -46,7 +50,18 @@ export default function Home() {
 
   const claimGhostHandler = async () => {
     try {
-      await claimGhost();
+      const initialGhostTypeIndices =
+        localStorage.getItem('GHOST_TYPE_INDICES');
+      const salt = localStorage.getItem('SALT');
+      let decimal = 0;
+      const ghostTypeIndices = initialGhostTypeIndices
+        ? JSON.parse(initialGhostTypeIndices)
+        : [1, 1, 1, 1, 0, 0, 0, 0];
+      for (let i = 0; i < 8; i++) {
+        const j = 7 - i;
+        decimal += ghostTypeIndices[j] * 2 ** i;
+      }
+      await claimGhost(decimal, Number(salt));
     } catch (err) {
       console.log(err);
     }
@@ -61,16 +76,39 @@ export default function Home() {
   };
 
   const claimableComponent = () => {
-    return (
-      <>
-        <div className="button01">
-          <Link href="/ghosts">
-            <a>Game Start</a>
-          </Link>
-        </div>
-        <p>Current GST balance: {currentBalance}</p>
-      </>
-    );
+    if (winner == null) {
+      return (
+        <>
+          <div className="button01">
+            <Link href="/ghosts">
+              <a>Game Start</a>
+            </Link>
+          </div>
+          <p>Current GST balance: {currentBalance}</p>
+        </>
+      );
+    } else if (
+      currentAccount &&
+      winner.toLowerCase() == currentAccount.toLowerCase()
+    ) {
+      return (
+        <>
+          <div className="button01">
+            <button onClick={claimGhostHandler}>Claim GST</button>
+          </div>
+          <p>Current GST balance: {currentBalance}</p>
+        </>
+      );
+    } else {
+      return (
+        <>
+          <div className="button01">
+            <p>Wait for the opponent completes the game.</p>
+          </div>
+          <p>Current GST balance: {currentBalance}</p>
+        </>
+      );
+    }
   };
 
   useEffect(() => {

@@ -3,7 +3,7 @@ import { ethers, providers } from 'ethers';
 import GSTCoinContract from '../../public/GSTCoin.json';
 
 export const getGSTCoinContract = async () => {
-  const contractAddress = '0xE6E340D132b5f46d1e472DebcD681B2aBc16e57E';
+  const contractAddress = '0x9A5741235370E407F82F84865FA20f89A2ec641c';
   const provider = (await detectEthereumProvider()) as any;
   if (!provider) {
     alert('please install metamask');

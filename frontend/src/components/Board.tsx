@@ -9,12 +9,12 @@ import { ethers } from 'ethers';
 
 export const Board = () => {
   const initialGhostTypeIndices = localStorage.getItem('GHOST_TYPE_INDICES');
+  const salt = localStorage.getItem('SALT');
   const [positions, setPositions] = useState([]);
   const [opponentPositions, setOpponentPositions] = useState([]);
   const [goodAndEvil, setGoodAndEvil] = useState([0, 0]);
   const [needRevealIdx, setNeedRevealIdx] = useState(10);
   const [selected, setSelected] = useState<number | null>(null);
-  const [isWinningPosition, setIsWinningPosition] = useState(false);
   const [isWinningPositionIdx, setIsWinningPositionIdx] = useState(-1);
   const ghostTypeIndices = initialGhostTypeIndices
     ? JSON.parse(initialGhostTypeIndices)
@@ -48,28 +48,27 @@ export const Board = () => {
         setGoodAndEvil([good, evilCount]);
         const player1 = await contract.players(game, 0);
         if (player1.toLowerCase() === account.toLowerCase()) {
-          const t = pieces[0].some(
-            (v: number[], idx: number) =>
+          const passIndex = pieces[0].findIndex(function (
+            v: number[],
+            idx: number,
+          ) {
+            return (
               (v[0] === 0 && v[1] === 0 && ghostTypeIndices[idx] === 1) ||
-              (v[0] === 5 && v[1] === 0 && ghostTypeIndices[idx] === 1),
-          );
-          // const t = pieces[0].some(
-          //   (v: number[], idx: number) =>
-          //     (v[0] === 0 && v[1] === 0 && ghostTypeIndices[idx] === 1) ||
-          //     (v[0] === 5 && v[1] === 0 && ghostTypeIndices[idx] === 1),
-          // );
-          //   let passIndex = result.findIndex(function(element, idx){
-          //     console.log(idx)
-          //   return element > 85;
-          // });
-          t && setIsWinningPosition(true);
+              (v[0] === 5 && v[1] === 0 && ghostTypeIndices[idx] === 1)
+            );
+          });
+          setIsWinningPositionIdx(passIndex);
         } else {
-          const t = pieces[0].some(
-            (v: number[], idx: number) =>
+          const passIndex = pieces[0].findIndex(function (
+            v: number[],
+            idx: number,
+          ) {
+            return (
               (v[0] === 0 && v[1] === 5 && ghostTypeIndices[idx] === 1) ||
-              (v[0] === 5 && v[1] === 5 && ghostTypeIndices[idx] === 1),
-          );
-          t && setIsWinningPosition(true);
+              (v[0] === 5 && v[1] === 5 && ghostTypeIndices[idx] === 1)
+            );
+          });
+          setIsWinningPositionIdx(passIndex);
         }
       }
     };
@@ -100,16 +99,7 @@ export const Board = () => {
 
   const callWin = async () => {
     const { contract } = await getContract();
-
-    // positions.
-
-    // let passIndex = result.findIndex(function(element){
-    //   return element > 85;
-    // });
-    // uint8 idx,
-    //     uint8[] memory statuses,
-    //     uint256 solt
-    await contract.winMove();
+    await contract.winMove(isWinningPositionIdx, ghostTypeIndices, salt);
   };
 
   const renderSquare = useCallback(
@@ -190,7 +180,7 @@ export const Board = () => {
           What you got: Good: {goodAndEvil[0]}, Evil: {goodAndEvil[1]}
         </p>
         {needRevealIdx === 10 ? null : <button onClick={reveal}>reveal</button>}
-        {isWinningPosition ? (
+        {isWinningPositionIdx >= 0 ? (
           <button onClick={callWin}>Declare Win</button>
         ) : null}
       </div>

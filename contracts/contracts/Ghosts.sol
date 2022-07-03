@@ -197,7 +197,7 @@ contract Ghosts {
     function winMove(
         uint8 idx,
         uint8[] memory statuses,
-        uint256 solt
+        uint256 salt
     ) public isMyTurn {
         bytes32 game = playingGame[msg.sender];
         address player1 = players[game][0];
@@ -237,7 +237,7 @@ contract Ghosts {
             uint8 j = 7 - i;
             decimal += statuses[j] * (2**i);
         }
-        require(verifyPubHash(uint256(decimal), solt), "MBV");
+        require(verifyPubHash(uint256(decimal), salt), "MBV");
         require(isWin, "MBW");
         winner[game] = msg.sender;
         emit Winner(game, msg.sender);
@@ -286,7 +286,7 @@ contract Ghosts {
         }
     }
 
-    function claimGstCoin(uint256 v, uint256 solt) external {
+    function claimGstCoin(uint256 v, uint256 salt) external {
         bytes32 game = playingGame[msg.sender];
         if (
             turnPlayer[game] != msg.sender && block.timestamp > timeLimit[game]
@@ -298,7 +298,7 @@ contract Ghosts {
             game == playingGame[msg.sender] && winner[game] == msg.sender,
             "MBW"
         );
-        if (verifyPubHash(v, solt)) {
+        if (verifyPubHash(v, salt)) {
             gstCoin.mint(msg.sender, 20);
         }
         playingGame[players[game][0]] = "";
@@ -310,13 +310,13 @@ contract Ghosts {
         playingGame[msg.sender] = "";
     }
 
-    function verifyPubHash(uint256 v, uint256 solt)
+    function verifyPubHash(uint256 v, uint256 salt)
         private
         view
         returns (bool)
     {
         require(v < 256, "MB256");
-        uint256 hashedValue = PoseidonT3.poseidon([v, solt]);
+        uint256 hashedValue = PoseidonT3.poseidon([v, salt]);
         return hashedValue == pubHash[playingGame[msg.sender]][msg.sender];
     }
 

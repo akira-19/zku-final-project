@@ -52,11 +52,14 @@ const Ghosts = () => {
         const game = await checkOngoingGame(contract, account);
         if (game !== ethers.constants.HashZero) {
           const filter = contract.filters.Winner(game, null);
+
           contract.on(filter, (_, winnerAddress) => {
             if (winnerAddress.toLowerCase() == account.toLowerCase()) {
-              alert('You won!');
+              alert('You won! Claim you GSTCoin');
+              router.push('/');
             } else {
               alert('You lost...');
+              router.push('/');
             }
           });
 

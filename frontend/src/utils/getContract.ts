@@ -3,7 +3,7 @@ import { ethers, providers } from 'ethers';
 import GhostsContract from '../../public/Ghosts.json';
 
 export const getContract = async () => {
-  const contractAddress = '0xc3e53F4d16Ae77Db1c982e75a937B9f60FE63690';
+  const contractAddress = '0x6CF047325F32F8A261Fe6738D3b2c81F3aBADE5A';
   const provider = (await detectEthereumProvider()) as any;
   if (!provider) {
     alert('please install metamask');

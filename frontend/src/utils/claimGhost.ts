@@ -1,10 +1,10 @@
-import { getGSTCoinContract } from './getGSTCoinContract';
+import { getContract } from './getContract';
 
-export const claimGhost = async () => {
-  const { contract } = await getGSTCoinContract();
+export const claimGhost = async (v: number, salt: number) => {
+  const { contract } = await getContract();
 
   try {
-    const res = await contract.claim();
+    const res = await contract.claimGstCoin(v, salt);
   } catch (error) {
     console.log(error);
   }
