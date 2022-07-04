@@ -63,12 +63,14 @@ export default function Game() {
             }
           });
 
-          const turnFilter = contract.filters.TurnStart(game, null);
-          contract.on(turnFilter, (_, turnUserAddress) => {
-            if (turnUserAddress == account) {
-              router.reload();
-            }
-          });
+          // const turnFilter = contract.filters.TurnStart(game, null);
+          // contract.on(turnFilter, (_, turnUserAddress) => {
+          //   if (turnUserAddress.toLowerCase() === account.toLowerCase()) {
+          //     setStatus('Your Turn');
+          //   } else {
+          //     setStatus('Waiting ...');
+          //   }
+          // });
 
           const player = await contract.players(game, 1);
           if (player !== ethers.constants.AddressZero) {
@@ -82,9 +84,7 @@ export default function Game() {
 
           setElement(<Board />);
         } else {
-          setStatus(
-            'Select initial good ghosts positions from light blue squares.',
-          );
+          setStatus('Select initial four good ghosts positions.');
           setElement(<InitialBoard gameStartHandler={gameStartHandler} />);
         }
       } catch (error) {

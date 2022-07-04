@@ -4,6 +4,7 @@ import { Piece } from './Piece';
 import { verifierCalldata } from '../zkproof/verifier';
 import { getContract } from '../utils/getContract';
 import { useRouter } from 'next/router';
+import { NumberBox } from './NumberBox';
 const buildPoseidon = require('circomlibjs').buildPoseidon;
 
 type Props = {
@@ -12,29 +13,21 @@ type Props = {
 
 export const InitialBoard: React.FC<Props> = ({ gameStartHandler }) => {
   const router = useRouter();
-  const [positions, setPositions] = useState<('' | number)[]>([]);
-  const inputHandler = (idx: number, num: number) => {
-    if (positions.includes(num) || (num < 0 && num > 7)) {
-      const newPositions = positions;
-      newPositions[idx] = '';
-      setPositions(newPositions);
-    } else {
-      const newPositions = positions;
-      newPositions[idx] = num;
-      setPositions(newPositions);
-    }
-  };
+  const [goodPositions, setGoodPositions] = useState<number[]>([]);
 
   const clickHandler = async () => {
     gameStartHandler('Create a proof and waiting transaction confirmed.');
     try {
+      if (goodPositions.length !== 4) {
+        return;
+      }
       const { contract } = await getContract();
       const poseidon = await buildPoseidon();
       const F = poseidon.F;
 
       let binary = '';
       const ghostTypeIndices = [0, 1, 2, 3, 4, 5, 6, 7].map((v) => {
-        if (positions.includes(v + 1)) {
+        if (goodPositions.includes(v + 1)) {
           binary = binary + '1';
           return 1;
         } else {
@@ -110,6 +103,19 @@ export const InitialBoard: React.FC<Props> = ({ gameStartHandler }) => {
   const squares = Array.from(new Array(36), (_, i) => {
     return renderSquare(i);
   });
+
+  const clickNumber = (i: number) => {
+    if (goodPositions.includes(i)) {
+      const newArray = goodPositions.filter((v: number) => {
+        return v !== i;
+      });
+      setGoodPositions(newArray);
+    } else if (goodPositions.length < 4) {
+      const newArray = [...goodPositions, i];
+      setGoodPositions(newArray);
+    }
+  };
+
   return (
     <>
       <div
@@ -121,28 +127,11 @@ export const InitialBoard: React.FC<Props> = ({ gameStartHandler }) => {
         }}
       >
         {squares}
-        <div style={{ marginTop: '20px' }}>
-          <input
-            className={'good_input'}
-            value={positions[0]}
-            onChange={(e) => inputHandler(0, parseInt(e.target.value))}
-          />
-          <input
-            className={'good_input'}
-            value={positions[1]}
-            onChange={(e) => inputHandler(1, parseInt(e.target.value))}
-          />
-          <input
-            className={'good_input'}
-            value={positions[2]}
-            onChange={(e) => inputHandler(2, parseInt(e.target.value))}
-          />
-          <input
-            className={'good_input'}
-            value={positions[3]}
-            onChange={(e) => inputHandler(3, parseInt(e.target.value))}
-          />
-          <button onClick={clickHandler}>Start Game</button>
+        <div style={{ marginTop: '30px', width: '100%' }}>
+          <NumberBox selected={goodPositions} clickHandler={clickNumber} />
+          <div onClick={clickHandler} className="button02">
+            <a href="#">Start Game</a>
+          </div>
         </div>
       </div>
     </>

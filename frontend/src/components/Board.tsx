@@ -25,14 +25,6 @@ export const Board = () => {
       const { contract, account } = await getContract();
       const game = await checkOngoingGame(contract, account);
 
-      const filter = contract.filters.TurnStart(game, null);
-      contract.on(filter, (game, winnerAddress) => {
-        if (winnerAddress.toLowerCase() == account.toLowerCase()) {
-          console.log('your turn');
-        } else {
-          console.log('not your turn');
-        }
-      });
       if (game !== ethers.constants.HashZero) {
         const pieces = await contract.currentPositions();
         const pieceStatuses = await contract.currentPieceStatuses();
@@ -40,6 +32,16 @@ export const Board = () => {
           const index = pieceStatuses[0].findIndex((v: number) => v === 10);
           setNeedRevealIdx(index);
         }
+
+        // const turnFilter = contract.filters.TurnStart(game, null);
+        // contract.on(turnFilter, (_, turnUserAddress) => {
+        //   if (turnUserAddress.toLowerCase() === account.toLowerCase()) {
+        //     setPositions(pieces[0]);
+        //   } else {
+        //     setPositions(pieces[0]);
+        //   }
+        // });
+
         setPositions(pieces[0]);
         setOpponentPositions(pieces[1]);
         const good = pieceStatuses[1].filter((v: number) => v === 1).length;
@@ -179,9 +181,15 @@ export const Board = () => {
         <p>
           What you got: Good: {goodAndEvil[0]}, Evil: {goodAndEvil[1]}
         </p>
-        {needRevealIdx === 10 ? null : <button onClick={reveal}>reveal</button>}
+        {needRevealIdx === 10 ? null : (
+          <div onClick={reveal} className="button02">
+            <a href="#">Reveal</a>
+          </div>
+        )}
         {isWinningPositionIdx >= 0 ? (
-          <button onClick={callWin}>Declare Win</button>
+          <div onClick={callWin} className="button02">
+            <a href="#">Declare Win</a>
+          </div>
         ) : null}
       </div>
     </div>
