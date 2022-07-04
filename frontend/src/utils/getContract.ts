@@ -3,6 +3,7 @@ import { ethers, providers } from 'ethers';
 import GhostsContract from '../../public/Ghosts.json';
 
 export const getContract = async () => {
+  // const contractAddress = '0x851356ae760d987E095750cCeb3bC6014560891C';
   const contractAddress = '0x6CF047325F32F8A261Fe6738D3b2c81F3aBADE5A';
   const provider = (await detectEthereumProvider()) as any;
   if (!provider) {

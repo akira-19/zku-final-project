@@ -1,4 +1,5 @@
 import { Square } from './Square';
+import { useState } from 'react';
 
 type Props = {
   x: number;
@@ -17,13 +18,15 @@ export const BoardSquare: React.FC<Props> = ({
   children,
 }) => {
   const black = (x + y) % 2 === 1;
+  const clickedColor = 'yellow';
+  const selectableColor = '#8ed0ff';
 
   let fill = black ? '#018080' : '#ddd';
   fill = isSelected ? 'yellow' : fill;
   fill = isGoal ? 'red' : fill;
-  fill = isSelectable ? '#8ed0ff' : fill;
+  fill = isSelectable ? selectableColor : fill;
   const border = isSelectable ? '1px solid grey' : '';
-  let number = null;
+  let number: number | null = null;
   if (isSelectable) {
     if (x === 1 && y === 4) {
       number = 1;
@@ -45,19 +48,38 @@ export const BoardSquare: React.FC<Props> = ({
   }
 
   return (
-    <div
-      style={{
-        position: 'relative',
-        width: '100%',
-        height: '100%',
-      }}
-    >
-      <Square color={fill} border={border}>
-        <>
-          {number}
-          {children}
-        </>
-      </Square>
-    </div>
+    <>
+      {isSelectable ? (
+        <div
+          style={{
+            position: 'relative',
+            width: '100%',
+            height: '100%',
+          }}
+        >
+          <Square color={fill} border={border}>
+            <>
+              {number}
+              {children}
+            </>
+          </Square>
+        </div>
+      ) : (
+        <div
+          style={{
+            position: 'relative',
+            width: '100%',
+            height: '100%',
+          }}
+        >
+          <Square color={fill} border={border}>
+            <>
+              {number}
+              {children}
+            </>
+          </Square>
+        </div>
+      )}
+    </>
   );
 };
