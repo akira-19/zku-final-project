@@ -6,6 +6,8 @@ Ghosts Link:
 
 https://zku-final-project.vercel.app/
 
+Demo video:
+
 ## Project Structure
 
 The project has three main folders:
@@ -21,6 +23,7 @@ The [contracts folder](/contracts/) contains all the smart contracts and circuit
 
 Each player commits their proofs that prove they chose four good ghosts and four evil ghosts.
 In the circuit, good or evil is represented by binaries. Good is 1 and evil is 0.
+The binaries are 2\*\*8 = 256 patterns, and it is vulnerable by brute force attack. Therefore the circuit requires a private salt.
 
 #### contracts
 
@@ -82,9 +85,9 @@ In test directory,
    - You get all the opponent's good ghosts.
    - The opponents get all your evil ghosts.
    - Your good ghost gets the opponent side red square and declare win.
+6. After you win, you can claim ERC20 coins.
 
 ## Future steps
 
-- Give ERC20 utility token to players
 - Players can buy NFT by the utility token
 - Players use the NFT for ghosts images in games
