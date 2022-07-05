@@ -7,6 +7,8 @@ Ghosts Link:
 https://zku-final-project.vercel.app/
 
 Demo video:
+https://youtu.be/HGzqmTf_CA4
+https://youtu.be/eyf8ahx3Jvw
 
 ## Project Structure
 
