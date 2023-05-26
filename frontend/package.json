@@ -20,7 +20,7 @@
     "randombytes": "^2.1.0",
     "react": "18.1.0",
     "react-dom": "18.1.0",
-    "snarkjs": "^0.4.16"
+    "snarkjs": "^0.7.0"
   },
   "devDependencies": {
     "@types/node": "17.0.30",
