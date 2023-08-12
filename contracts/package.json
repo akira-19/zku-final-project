@@ -16,7 +16,7 @@
     "test": "node scripts/bump-solidity.js && npx hardhat test"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "^4.7.0",
+    "@openzeppelin/contracts": "^4.9.3",
     "dotenv": "^16.0.1"
   }
 }
